@@ -72,7 +72,7 @@ All configuration is done **without touching the code**.
 GpioFlow is a **commercial product** and is distributed as a prebuilt image / installer.
 
 👉 Learn more, request a demo, or obtain a license:  
-🌐 **https://actionpanel.de**  
+🌐 **https://gpioflow.com**  
 
 🛒 Gumroad:  
 https://actionpanel.gumroad.com/l/cggpcb  
