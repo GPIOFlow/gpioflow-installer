@@ -17,14 +17,6 @@ echo "Use GPIOFlow only in environments where failure would not result in harm, 
 echo "The developer disclaims all liability for any damage caused by the software, including data loss, system failures, or hardware malfunctions."
 echo "=========================================================="
 
-# Prompt user to confirm they want to continue (Yes/No)
-read -p "Do you want to proceed with the installation? [y/N]: " confirm
-
-if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
-  echo "Installation aborted."
-  exit 1
-fi
-
 # ==========================================================
 # The rest of your script will continue here:
 # Install packages, configure services, etc.
