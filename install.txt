@@ -1,6 +1,33 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+
+
+# ==========================================================
+# DISCLAIMER
+# ==========================================================
+echo "=========================================================="
+echo "GPIOFlow is intended for hobby, maker, and non-critical applications only."
+echo "It is **not** designed, tested, or suitable for use in safety-critical, life-support, or mission-critical systems."
+echo "The developer is not responsible for any damages, injuries, or losses resulting from improper use, faulty wiring, or hardware failures."
+echo ""
+echo "By using this software, you acknowledge that you do so at your own risk."
+echo "The software is provided 'as-is,' and no warranties or guarantees of any kind are made regarding its functionality, reliability, or safety."
+echo ""
+echo "Use GPIOFlow only in environments where failure would not result in harm, injury, or significant damage."
+echo "The developer disclaims all liability for any damage caused by the software, including data loss, system failures, or hardware malfunctions."
+echo "=========================================================="
+
+# Prompt user to confirm they want to continue
+read -p "Press [Enter] to proceed with the installation or [Ctrl+C] to cancel..."
+
+# ==========================================================
+# The rest of your script will continue here:
+# Install packages, configure services, etc.
+# ==========================================================
+echo "Starting installation..."
+
+
 # ==========================================================
 # gpioflow installer (Debian Bookworm / Raspberry Pi)
 # - installs: Java 17, MariaDB, pigpiod, Tomcat9 (tarball)
@@ -20,7 +47,7 @@ SQL_URL="https://gpioflow.com/software/latest/sql/gpioflow.sql"
 WAR_URL="https://gpioflow.com/software/latest/war/gpioflow.war"
 
 # -------------------------
-# DB user (für deine App)
+# DB user (fÃ¼r deine App)
 # -------------------------
 DB_NAME="gpioflow"
 DB_USER="gpioflow_databaseuser"
@@ -48,7 +75,7 @@ log() { echo -e "[gpioflow] $*"; }
 
 require_root() {
   if [[ "${EUID}" -ne 0 ]]; then
-    echo "Bitte als root ausführen (oder: sudo ./install.sh)"
+    echo "Bitte als root ausfÃ¼hren (oder: sudo ./install.sh)"
     exit 1
   fi
 }
@@ -85,7 +112,7 @@ apt install -y \
 
 JAVA_HOME="$(detect_java_home)"
 if [[ -z "${JAVA_HOME}" ]]; then
-  echo "Konnte JAVA_HOME nicht ermitteln. Prüfe Java Installation."
+  echo "Konnte JAVA_HOME nicht ermitteln. PrÃ¼fe Java Installation."
   exit 1
 fi
 log "JAVA_HOME=${JAVA_HOME}"
@@ -123,7 +150,7 @@ fi
 # -------------------------
 sudo mkdir -p /etc/gpioflow
 
-# Generiere zufälliges Passwort, falls noch nicht gesetzt
+# Generiere zufÃ¤lliges Passwort, falls noch nicht gesetzt
 DB_PASS="${DB_PASS:-$(openssl rand -base64 16)}"
 
 sudo tee /etc/gpioflow/db.conf > /dev/null <<EOF
