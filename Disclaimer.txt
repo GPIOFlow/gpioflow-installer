@@ -1,0 +1,7 @@
+# DISCLAIMER
+
+GPIOFlow is intended for hobby, maker, and non-critical applications only. It is **not** designed, tested, or suitable for use in safety-critical, life-support, or mission-critical systems. The developer is not responsible for any damages, injuries, or losses resulting from improper use, faulty wiring, or hardware failures.
+
+By using this software, you acknowledge that you do so at your own risk. The software is provided "as-is," and no warranties or guarantees of any kind are made regarding its functionality, reliability, or safety.
+
+Use GPIOFlow only in appropriate environments where failure would not result in harm, injury, or significant damage. The developer disclaims all liability for any damage caused by the software, including data loss, system failures, or hardware malfunctions.
