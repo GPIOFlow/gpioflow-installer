@@ -101,3 +101,10 @@ The proprietary GpioFlow application (WAR file, frontend, backend
 logic, configuration) remains the intellectual property of the author
 and is not open source.
 
+## 📄 Legal & Licensing
+For licensing, third-party software, and usage limitations,
+see LICENSE.txt, THIRD_PARTY_NOTICE.md, and DISCLAIMER.txt.
+
+
+
+
