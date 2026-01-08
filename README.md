@@ -5,7 +5,8 @@ Web-based GPIO and PWM control for Raspberry Pi with image-based buttons, manual
 🚀 **Web-based GPIO & PWM control software for Raspberry Pi with a dynamic, configurable frontend.**
 
 ---
-<img width="1410" height="871" alt="demo-ui" src="https://github.com/user-attachments/assets/c1292f0c-f02c-4373-ba5b-06b3895fa8f2" />
+<img width="1456" height="804" alt="web-ui" src="https://github.com/user-attachments/assets/ac0c98b4-ac46-4220-8068-b44836a66f89" />
+
 
 ## 🔌 What is GpioFlow?
 
