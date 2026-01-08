@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# ===============================
+# CONFIG
+# ===============================
+APP_NAME="gpioflow"
+WAR_URL="https://gpioflow.com/software/latest/war/gpioflow.war"
+
+TOMCAT_DIR="/opt/tomcat"
+WEBAPPS_DIR="${TOMCAT_DIR}/webapps"
+WAR_TARGET="${WEBAPPS_DIR}/${APP_NAME}.war"
+
+TMP_WAR="/tmp/${APP_NAME}.war"
+
+# ===============================
+# REQUIRE ROOT
+# ===============================
+if [[ "$EUID" -ne 0 ]]; then
+  echo "Please run as root (sudo ./update.sh)"
+  exit 1
+fi
+
+echo "[gpioflow] stopping tomcat"
+systemctl stop tomcat9 || true
+
+echo "[gpioflow] downloading new WAR"
+curl -fL "${WAR_URL}" -o "${TMP_WAR}"
+
+echo "[gpioflow] removing old deployment"
+rm -f  "${WAR_TARGET}"
+rm -rf "${WEBAPPS_DIR:?}/${APP_NAME}"
+
+echo "[gpioflow] deploying new WAR"
+cp "${TMP_WAR}" "${WAR_TARGET}"
+chown tomcat:tomcat "${WAR_TARGET}"
+
+echo "[gpioflow] starting tomcat"
+systemctl start tomcat9
+
+echo "[gpioflow] update complete"
+echo "Check logs: journalctl -u tomcat9 -f"
