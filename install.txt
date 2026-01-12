@@ -96,6 +96,18 @@ mysql_cmd() {
 # ==========================================================
 require_root
 
+
+if systemctl list-unit-files | grep -q '^tomcat9\.service'; then
+    echo "[gpioflow] ⚠️ Tomcat9 Service existiert bereits. Installation wird abgebrochen."
+    exit 1
+fi
+
+if [ -d "/opt/tomcat" ]; then
+    echo "[gpioflow] ⚠️ Tomcat-Verzeichnis /opt/tomcat existiert bereits. Installation wird abgebrochen."
+    exit 1
+fi
+
+
 log "prepare temp dir"
 rm -rf "${TMP_DIR}"
 mkdir -p "${TMP_DIR}"
