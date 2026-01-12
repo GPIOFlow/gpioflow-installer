@@ -38,10 +38,12 @@ echo "Starting installation..."
 APP_NAME="gpioflow"
 
 SQL_URL="https://gpioflow.com/software/latest/sql/gpioflow.sql"
+SQL_SHA256="1ed790ae59bf18d3cd03e68b89b2ccbce654898d9397f3e20a7d9bab5681bbcc"
+
 
 # TODO: HIER deine echte WAR-URL eintragen:
 WAR_URL="https://gpioflow.com/software/latest/war/gpioflow.war"
-
+WAR_SHA256="dcaf2a964dca99b0fc65f07dc5c03a8212591f1fcf9d74af55b8a901c468ec34"
 # -------------------------
 # DB user (für deine App)
 # -------------------------
@@ -127,6 +129,9 @@ systemctl enable --now mariadb
 # ==========================================================
 log "download SQL from ${SQL_URL}"
 curl -fL "${SQL_URL}" -o "${SQL_LOCAL}"
+
+log "verify SQL integrity (SHA-256)"
+echo "${SQL_SHA256}  ${SQL_LOCAL}" | sha256sum -c -
 
 log "import SQL (creates DB + tables via CREATE DATABASE + USE in file)"
 mysql_cmd < "${SQL_LOCAL}"
@@ -256,6 +261,9 @@ systemctl daemon-reload
 # ==========================================================
 log "download WAR from ${WAR_URL}"
 curl -fL "${WAR_URL}" -o "${WAR_LOCAL}"
+
+log "verify WAR integrity (SHA-256)"
+echo "${WAR_SHA256}  ${WAR_LOCAL}" | sha256sum -c -
 
 log "deploy WAR to Tomcat webapps"
 systemctl stop tomcat9 || true
