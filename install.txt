@@ -168,7 +168,7 @@ chgrp ${TOMCAT_USER} /etc/gpioflow/db.conf
 
 log "create app DB user with generated password"
 mysql_cmd <<EOF
-CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS_GENERATED}';
+CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';
 GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';
 FLUSH PRIVILEGES;
 EOF
