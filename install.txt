@@ -44,7 +44,7 @@ SQL_SHA256="1ed790ae59bf18d3cd03e68b89b2ccbce654898d9397f3e20a7d9bab5681bbcc"
 
 
 WAR_URL="https://gpioflow.com/software/latest/war/gpioflow.war"
-WAR_SHA256="c2f9e3719e83e70b415ef8eb6e9dd509edeb1ff75263f00e8a303bab507718c7"
+WAR_SHA256="069897d54ab42c98ee7e36592d7f2e3b2feaac364dbb96b35a60cbbb125a0696"
 # -------------------------
 # DB user 
 # -------------------------
