@@ -97,7 +97,7 @@ mysql_cmd() {
 require_root
 
 if ! id -u "${TOMCAT_USER}" >/dev/null 2>&1; then
-  useradd -r -m -U -d "${TOMCAT_DIR}" -s /usr/sbin/nologin "${TOMCAT_USER}"
+  useradd -r -U -s /usr/sbin/nologin "${TOMCAT_USER}"
 fi
 
 if systemctl list-unit-files | grep -q '^tomcat9\.service'; then
