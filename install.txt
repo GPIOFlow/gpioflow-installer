@@ -42,11 +42,11 @@ SQL_URL="https://gpioflow.com/software/latest/sql/gpioflow.sql"
 SQL_SHA256="1ed790ae59bf18d3cd03e68b89b2ccbce654898d9397f3e20a7d9bab5681bbcc"
 
 
-# TODO: HIER deine echte WAR-URL eintragen:
+
 WAR_URL="https://gpioflow.com/software/latest/war/gpioflow.war"
 WAR_SHA256="dcaf2a964dca99b0fc65f07dc5c03a8212591f1fcf9d74af55b8a901c468ec34"
 # -------------------------
-# DB user (für deine App)
+# DB user 
 # -------------------------
 DB_NAME="gpioflow"
 DB_USER="gpioflow_databaseuser"
