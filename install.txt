@@ -16,7 +16,7 @@ echo ""
 echo "Use GPIOFlow only in environments where failure would not result in harm, injury, or significant damage."
 echo "The developer disclaims all liability for any damage caused by the software, including data loss, system failures, or hardware malfunctions."
 echo "=========================================================="
-echo "�  WARNING: Intended for fresh systems. Existing Tomcat installations will be overwritten."
+echo "  WARNING: Intended for fresh systems. Existing Tomcat installations will be overwritten."
 
 # ==========================================================
 # The rest of your script will continue here:
@@ -44,7 +44,7 @@ SQL_SHA256="1ed790ae59bf18d3cd03e68b89b2ccbce654898d9397f3e20a7d9bab5681bbcc"
 
 
 WAR_URL="https://gpioflow.com/software/latest/war/gpioflow.war"
-WAR_SHA256="d0e66adda2832d9e388accac439b6297342cf10baac6c0d0ff7266a5f14769f2"
+WAR_SHA256="3f7c189836c5cfd27e526ca0c0f41c33fc97c358a51759bf4765887b412fea3d"
 # -------------------------
 # DB user 
 # -------------------------
@@ -74,7 +74,7 @@ log() { echo -e "[gpioflow] $*"; }
 
 require_root() {
   if [[ "${EUID}" -ne 0 ]]; then
-    echo "Bitte als root ausführen (oder: sudo ./install.sh)"
+    echo "Bitte als root ausfÃ¼hren (oder: sudo ./install.sh)"
     exit 1
   fi
 }
@@ -98,12 +98,12 @@ require_root
 
 
 if systemctl list-unit-files | grep -q '^tomcat9\.service'; then
-    echo "[gpioflow] �� Tomcat9 Service exists. Cancel installation."
+    echo "[gpioflow] ¸ Tomcat9 Service exists. Cancel installation."
     exit 1
 fi
 
 if [ -d "/opt/tomcat" ]; then
-    echo "[gpioflow] �� Tomcat-dir /opt/tomcat exists. Cancel installation."
+    echo "[gpioflow] ¸ Tomcat-dir /opt/tomcat exists. Cancel installation."
     exit 1
 fi
 
@@ -129,7 +129,7 @@ apt install -y \
 
 JAVA_HOME="$(detect_java_home)"
 if [[ -z "${JAVA_HOME}" ]]; then
-  echo "Konnte JAVA_HOME nicht ermitteln. Prüfe Java Installation."
+  echo "Konnte JAVA_HOME nicht ermitteln. PrÃ¼fe Java Installation."
   exit 1
 fi
 log "JAVA_HOME=${JAVA_HOME}"
@@ -163,7 +163,7 @@ mysql_cmd < "${SQL_LOCAL}"
 # -------------------------
 sudo mkdir -p /etc/gpioflow
 
-# Generiere zufälliges Passwort, falls noch nicht gesetzt
+# Generiere zufÃ¤lliges Passwort, falls noch nicht gesetzt
 DB_PASS="${DB_PASS:-$(openssl rand -base64 16)}"
 
 sudo tee /etc/gpioflow/db.conf > /dev/null <<EOF
@@ -187,7 +187,7 @@ mkdir -p /etc/gpioflow/state
 chown tomcat:tomcat /etc/gpioflow/state
 chmod 700 /etc/gpioflow/state
 
-# Root behält Kontrolle über den Config-Ordner selbst
+# Root behÃ¤lt Kontrolle Ã¼ber den Config-Ordner selbst
 chown root:root /etc/gpioflow
 chmod 755 /etc/gpioflow
 
