@@ -1,0 +1,303 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+
+# ==========================================================
+# DISCLAIMER
+# ==========================================================
+echo "=========================================================="
+echo "GPIOFlow is intended for hobby, maker, and non-critical applications only."
+echo "It is **not** designed, tested, or suitable for use in safety-critical, life-support, or mission-critical systems."
+echo "The developer is not responsible for any damages, injuries, or losses resulting from improper use, faulty wiring, or hardware failures."
+echo ""
+echo "By using this software, you acknowledge that you do so at your own risk."
+echo "The software is provided 'as-is,' and no warranties or guarantees of any kind are made regarding its functionality, reliability, or safety."
+echo ""
+echo "Use GPIOFlow only in environments where failure would not result in harm, injury, or significant damage."
+echo "The developer disclaims all liability for any damage caused by the software, including data loss, system failures, or hardware malfunctions."
+echo "=========================================================="
+echo "è  WARNING: Intended for fresh systems. Existing Tomcat installations will be overwritten."
+
+# ==========================================================
+# The rest of your script will continue here:
+# Install packages, configure services, etc.
+# ==========================================================
+echo "Starting installation..."
+
+
+# ==========================================================
+# gpioflow installer (Debian Bookworm / Raspberry Pi)
+# - installs: Java 17, MariaDB, pigpiod, Tomcat9 (tarball)
+# - downloads: SQL + WAR from gpioflow.com
+# - deploys: WAR to Tomcat
+# - enables autostart: pigpiod, mariadb, tomcat9
+# ==========================================================
+
+# -------------------------
+# App / Download URLs
+# -------------------------
+APP_NAME="gpioflow"
+
+SQL_URL="https://gpioflow.com/software/latest/sql/gpioflow.sql"
+SQL_SHA256="1ed790ae59bf18d3cd03e68b89b2ccbce654898d9397f3e20a7d9bab5681bbcc"
+
+
+
+WAR_URL="https://gpioflow.com/software/latest/war/gpioflow.war"
+WAR_SHA256="d0e66adda2832d9e388accac439b6297342cf10baac6c0d0ff7266a5f14769f2"
+# -------------------------
+# DB user 
+# -------------------------
+DB_NAME="gpioflow"
+DB_USER="gpioflow_databaseuser"
+
+# -------------------------
+# Tomcat Tarball
+# -------------------------
+TOMCAT_USER="tomcat"
+TOMCAT_GROUP="tomcat"
+TOMCAT_DIR="/opt/tomcat"
+TOMCAT_VER="9.0.113"
+
+# -------------------------
+# Paths
+# -------------------------
+TMP_DIR="/tmp/gpioflow-install"
+WAR_LOCAL="${TMP_DIR}/${APP_NAME}.war"
+SQL_LOCAL="${TMP_DIR}/${APP_NAME}.sql"
+TOMCAT_WEBAPPS="${TOMCAT_DIR}/webapps"
+
+# -------------------------
+# Helpers
+# -------------------------
+log() { echo -e "[gpioflow] $*"; }
+
+require_root() {
+  if [[ "${EUID}" -ne 0 ]]; then
+    echo "Bitte als root ausf√ºhren (oder: sudo ./install.sh)"
+    exit 1
+  fi
+}
+
+detect_java_home() {
+  local java_bin
+  java_bin="$(readlink -f /usr/bin/java || true)"
+  [[ -n "${java_bin}" && -x "${java_bin}" ]] || { echo ""; return; }
+  echo "$(dirname "$(dirname "${java_bin}")")"
+}
+
+mysql_cmd() {
+  # Root via unix_socket auf Debian/RPi
+  mysql
+}
+
+# ==========================================================
+# Start
+# ==========================================================
+require_root
+
+
+if systemctl list-unit-files | grep -q '^tomcat9\.service'; then
+    echo "[gpioflow] ∏è Tomcat9 Service exists. Cancel installation."
+    exit 1
+fi
+
+if [ -d "/opt/tomcat" ]; then
+    echo "[gpioflow] ∏è Tomcat-dir /opt/tomcat exists. Cancel installation."
+    exit 1
+fi
+
+
+if ! id -u "${TOMCAT_USER}" >/dev/null 2>&1; then
+  useradd -r -U -s /usr/sbin/nologin "${TOMCAT_USER}"
+fi
+
+
+
+log "prepare temp dir"
+rm -rf "${TMP_DIR}"
+mkdir -p "${TMP_DIR}"
+
+log "apt update & install packages"
+apt update
+apt install -y \
+  openjdk-17-jre-headless \
+  mariadb-server \
+  curl ca-certificates tar \
+  pigpiod \
+  libpigpiod-if2-1
+
+JAVA_HOME="$(detect_java_home)"
+if [[ -z "${JAVA_HOME}" ]]; then
+  echo "Konnte JAVA_HOME nicht ermitteln. Pr√ºfe Java Installation."
+  exit 1
+fi
+log "JAVA_HOME=${JAVA_HOME}"
+
+# ==========================================================
+# Services: pigpiod + mariadb (autostart)
+# ==========================================================
+log "enable & start pigpiod"
+systemctl enable --now pigpiod
+
+log "enable & start mariadb"
+systemctl enable --now mariadb
+
+# ==========================================================
+# Download SQL + Import
+# ==========================================================
+log "download SQL from ${SQL_URL}"
+curl -fL "${SQL_URL}" -o "${SQL_LOCAL}"
+
+log "verify SQL integrity (SHA-256)"
+echo "${SQL_SHA256}  ${SQL_LOCAL}" | sha256sum -c -
+
+log "import SQL (creates DB + tables via CREATE DATABASE + USE in file)"
+mysql_cmd < "${SQL_LOCAL}"
+
+
+
+
+# -------------------------
+# Create secure DB config
+# -------------------------
+sudo mkdir -p /etc/gpioflow
+
+# Generiere zuf√§lliges Passwort, falls noch nicht gesetzt
+DB_PASS="${DB_PASS:-$(openssl rand -base64 16)}"
+
+sudo tee /etc/gpioflow/db.conf > /dev/null <<EOF
+DB_USER=gpioflow_databaseuser
+DB_PASS=${DB_PASS}
+DB_NAME=gpioflow
+EOF
+
+# Setze sichere Rechte
+sudo chown root:tomcat /etc/gpioflow/db.conf
+sudo chmod 640 /etc/gpioflow/db.conf
+
+echo "[gpioflow] secure DB config created in /etc/gpioflow/db.conf"
+
+# ----------------------------------------------------------
+# Create secure runtime state dir (device.id, license.json)
+# ----------------------------------------------------------
+mkdir -p /etc/gpioflow/state
+
+# Tomcat (Java) darf hier lesen + schreiben
+chown tomcat:tomcat /etc/gpioflow/state
+chmod 700 /etc/gpioflow/state
+
+# Root beh√§lt Kontrolle √ºber den Config-Ordner selbst
+chown root:root /etc/gpioflow
+chmod 755 /etc/gpioflow
+
+
+
+# Optional: Gruppe auf Tomcat setzen, damit App lesen kann
+chgrp ${TOMCAT_USER} /etc/gpioflow/db.conf
+
+log "create app DB user with generated password"
+mysql_cmd <<EOF
+CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';
+GRANT ALL PRIVILEGES ON ${DB_NAME}.* TO '${DB_USER}'@'localhost';
+FLUSH PRIVILEGES;
+EOF
+
+# ==========================================================
+# Tomcat install (tarball)
+# ==========================================================
+log "ensure tomcat user exists"
+
+
+log "download & install Tomcat ${TOMCAT_VER} to ${TOMCAT_DIR}"
+cd /tmp
+TARBALL="apache-tomcat-${TOMCAT_VER}.tar.gz"
+URL="https://dlcdn.apache.org/tomcat/tomcat-9/v${TOMCAT_VER}/bin/${TARBALL}"
+
+if systemctl list-unit-files | grep -q '^tomcat9\.service'; then
+  log "stopping existing tomcat9 (if running)"
+  systemctl stop tomcat9 || true
+fi
+
+curl -fL "${URL}" -o "${TARBALL}"
+
+mkdir -p "${TOMCAT_DIR}"
+rm -rf "${TOMCAT_DIR:?}/"*
+tar -xzf "${TARBALL}" -C "${TOMCAT_DIR}" --strip-components=1
+
+log "set permissions on Tomcat"
+chown -R "${TOMCAT_USER}:${TOMCAT_GROUP}" "${TOMCAT_DIR}"
+chmod -R u+rwX,go+rX "${TOMCAT_DIR}"
+chmod +x "${TOMCAT_DIR}/bin/"*.sh
+
+log "write systemd service /etc/systemd/system/tomcat9.service"
+cat > /etc/systemd/system/tomcat9.service <<EOF
+[Unit]
+Description=Apache Tomcat 9 (gpioflow)
+After=network.target mariadb.service pigpiod.service
+Wants=mariadb.service pigpiod.service
+
+[Service]
+Type=forking
+User=${TOMCAT_USER}
+Group=${TOMCAT_GROUP}
+
+Environment="JAVA_HOME=${JAVA_HOME}"
+Environment="CATALINA_HOME=${TOMCAT_DIR}"
+Environment="CATALINA_BASE=${TOMCAT_DIR}"
+Environment="CATALINA_PID=${TOMCAT_DIR}/temp/tomcat.pid"
+Environment="CATALINA_OPTS=-Xms256M -Xmx512M -server -Djava.awt.headless=true"
+Environment="JAVA_OPTS=-Djava.security.egd=file:/dev/./urandom"
+
+ExecStart=${TOMCAT_DIR}/bin/startup.sh
+ExecStop=${TOMCAT_DIR}/bin/shutdown.sh
+
+SuccessExitStatus=143
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+log "reload systemd"
+systemctl daemon-reload
+
+# ==========================================================
+# Download WAR + Deploy
+# ==========================================================
+log "download WAR from ${WAR_URL}"
+curl -fL "${WAR_URL}" -o "${WAR_LOCAL}"
+
+log "verify WAR integrity (SHA-256)"
+echo "${WAR_SHA256}  ${WAR_LOCAL}" | sha256sum -c -
+
+log "deploy WAR to Tomcat webapps"
+systemctl stop tomcat9 || true
+sleep 2
+
+rm -f  "${TOMCAT_WEBAPPS}/${APP_NAME}.war"
+rm -rf "${TOMCAT_WEBAPPS:?}/${APP_NAME}"
+
+cp "${WAR_LOCAL}" "${TOMCAT_WEBAPPS}/${APP_NAME}.war"
+chown "${TOMCAT_USER}:${TOMCAT_GROUP}" "${TOMCAT_WEBAPPS}/${APP_NAME}.war"
+
+# ==========================================================
+# Enable autostart (final) + start tomcat
+# ==========================================================
+log "enable autostart: pigpiod, mariadb, tomcat9"
+systemctl enable pigpiod mariadb tomcat9
+
+log "start tomcat9"
+systemctl start tomcat9
+
+
+# ==========================================================
+# Done
+# ==========================================================
+IP="$(hostname -I 2>/dev/null | awk '{print $1}' || true)"
+log "done"
+echo "Open: http://${IP:-$(hostname)}:8080/${APP_NAME}"
+echo "Tomcat logs:  journalctl -u tomcat9 -f"
+echo "pigpiod:      systemctl status pigpiod --no-pager"
+echo "mariadb:      systemctl status mariadb --no-pager"
