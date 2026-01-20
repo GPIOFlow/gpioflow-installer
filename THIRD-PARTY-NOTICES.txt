@@ -1,0 +1,51 @@
+GPIOFlow – Third-Party Notices
+
+GPIOFlow includes third-party open-source software components.
+These components are licensed separately under their respective licenses.
+
+---
+
+Apache Tomcat
+
+Licensed under the Apache License, Version 2.0
+https://www.apache.org/licenses/LICENSE-2.0
+
+---
+
+OpenJDK (Adoptium)
+
+Licensed under the GNU General Public License v2 with Classpath Exception
+https://openjdk.org/legal/gplv2+ce.html
+
+---
+
+MariaDB
+
+Licensed under the GNU General Public License v2
+https://mariadb.com/kb/en/licensing-faq/
+
+---
+
+MySQL Connector/J
+
+Licensed under the GNU General Public License v2 with FOSS Exception
+https://www.mysql.com/products/connector/
+
+---
+
+pigpio
+
+Licensed under a BSD-style license
+http://abyz.me.uk/rpi/pigpio/
+
+---
+
+Raspberry Pi OS (Debian Bookworm)
+
+Various open-source licenses
+https://www.raspberrypi.com/software/
+
+---
+
+These components are not part of the GPIOFlow product itself and are
+distributed under their respective licenses.
