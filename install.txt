@@ -44,7 +44,7 @@ SQL_SHA256="1ed790ae59bf18d3cd03e68b89b2ccbce654898d9397f3e20a7d9bab5681bbcc"
 
 
 WAR_URL="https://gpioflow.com/software/latest/war/gpioflow.war"
-WAR_SHA256="a99d41e61b1a4c121e3891a140b608800fc5010ea92ab737c7c152ff8f680d9b"
+WAR_SHA256="ae55117f4eed31ef7524f99ff089edc4115c05216144253eaa146323cd6c12b9"
 # -------------------------
 # DB user 
 # -------------------------
@@ -177,6 +177,33 @@ sudo chown root:tomcat /etc/gpioflow/db.conf
 sudo chmod 640 /etc/gpioflow/db.conf
 
 echo "[gpioflow] secure DB config created in /etc/gpioflow/db.conf"
+
+
+
+
+# ----------------------------------------------------------
+# Create secure API config (api.conf)
+# ----------------------------------------------------------
+
+API_USER="apiuser"
+API_PASS="$(openssl rand -base64 16)"
+
+tee /etc/gpioflow/api.conf > /dev/null <<EOF
+API_ENABLED=true
+API_USER=${API_USER}
+API_PASS=${API_PASS}
+EOF
+
+chown root:tomcat /etc/gpioflow/api.conf
+chmod 640 /etc/gpioflow/api.conf
+
+echo "=========================================================="
+echo "GPIOFlow API credentials (shown once):"
+echo "User: ${API_USER}"
+echo "Pass: ${API_PASS}"
+echo "=========================================================="
+
+
 
 # ----------------------------------------------------------
 # Create secure runtime state dir (device.id, license.json)
